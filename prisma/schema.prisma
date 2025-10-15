@@ -1,9 +1,47 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../app/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  balance   Float    @default(0) // Active trading package
+  income    Float    @default(0) // Referral income wallet
+  referrerId String?  // ID of the user who referred this user
+  referrer  User?    @relation("Referrals", fields: [referrerId], references: [id], onDelete: SetNull)
+  referrals User[]   @relation("Referrals")
+  deposits  Deposit[]
+  supports  Support[]
+  createdAt DateTime @default(now())
+  role      Role     @default(USER)
+}
+
+model Deposit {
+  id        String   @id @default(cuid())
+  userId    String
+  amount    Float
+  txHash    String?
+  network   String   // "BEP20" or "TRC20"
+  address   String   // Unique per user/network
+  confirmed Boolean  @default(false)
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Support {
+  id        String   @id @default(cuid())
+  userId    String
+  query     String
+  response  String?
+  status    String   @default("OPEN") // OPEN, RESOLVED
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+  USER
+  ADMIN
 }
