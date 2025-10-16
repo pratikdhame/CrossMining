@@ -19,17 +19,23 @@ model User {
   supports  Support[]
   createdAt DateTime @default(now())
   role      Role     @default(USER)
+  bep20Address String? 
+  bep20Index   Int?    @default(1) // Starts from 1, 0 is reserved
+  trc20Address String? 
+  trc20Index   Int?    @default(1)
 }
 
 model Deposit {
-  id        String   @id @default(cuid())
-  userId    String
-  amount    Float
-  txHash    String?
-  network   String   // "BEP20" or "TRC20"
-  address   String   // Unique per user/network
-  confirmed Boolean  @default(false)
-  user      User     @relation(fields: [userId], references: [id])
+  id            String   @id @default(cuid())
+  userId        String
+  amount        Float
+  txHash        String?
+  network       String   // "BEP20" or "TRC20"
+  address       String   // Unique per user/network
+  confirmed     Boolean  @default(false)
+  swept         Boolean  @default(false) // New field
+  sweepTxHash   String?  // New field for sweep transaction
+  user          User     @relation(fields: [userId], references: [id])
 }
 
 model Support {
